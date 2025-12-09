@@ -14,44 +14,52 @@ classifiers = [
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10"
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8.1"
 dynamic = ["version"]
 dependencies = [
+  'azure-devops',
+  'azure-functions; python_version <= "3.10"',
   'azure-identity',
   'azure-keyvault-secrets',
-  'llama-index',
+  'llama-index>=0.6.0,<0.9.0',
   'httpx',
   'GitPython',
   'knack',
   'openai',
   'requests',
-  "pyyaml",
+  'pyyaml',
+  'typing_extensions; python_version <= "3.10"',
+  'transformers; python_version <= "3.8"'
 ]
 
 [project.optional-dependencies]
 test = [
-    "bandit[toml]==1.7.4",
-    "black==23.1.0",
-    "check-manifest==0.48",
-    "flake8-bugbear==23.3.12",
+    "bandit[toml]==1.7.5",
+    "black==23.3.0",
+    "cattrs",
+    "docx2txt",
+    "check-manifest==0.49",
+    "flake8-bugbear==23.6.5",
     "flake8-docstrings",
     "flake8-formatter_junit_xml",
     "flake8",
     "flake8-pyproject",
-    "pre-commit==2.17.0",
-    "pylint==2.17.0",
+    "pre-commit==3.3.3",
+    "pylint==2.17.4",
     "pylint_junit",
     "pytest-cov>=3.0.0",
     "pytest-mock",
     "pytest-runner",
+    "pytest-xdist",
     "pytest>=7.2.2",
     "pytest-github-actions-annotate-failures",
-    "shellcheck-py==0.9.0.2"
+    "shellcheck-py==0.9.0.5",
+    "requests_mock"
 ]
 
 [project.scripts]
@@ -74,9 +82,16 @@ targets = "src"
 [tool.black]
 line-length = 120
 fast = true
+experimental-string-processing = true
 
 [tool.coverage.run]
 branch = true
+omit = [
+    # Omitting files that can not be covered by tests
+    "src/gpt/__main__.py",
+    "src/gpt_review/__main__.py",
+    "src/gpt_review/main.py"
+]
 
 [tool.coverage.report]
 fail_under = 100
@@ -100,8 +115,17 @@ ignore = [
     "E722",
     "B001",
     "W503",
-    "E203"
+    "E203",
+    # Covered by Ruff
+    "F401",
+    "F501",
+    "F821",
+    "W391", # Covered by Pylint trailing-newlines
 ]
+
+[tool.isort]
+profile = "black"
+src_paths = ["src", "tests", "azure"]
 
 [tool.pyright]
 include = ["src"]
@@ -122,7 +146,7 @@ executionEnvironments = [
 ]
 
 [tool.pytest.ini_options]
-# addopts = "--cov-report xml:coverage.xml --cov src --cov-fail-under 0 --cov-append -m 'not integration'"
+addopts = "--cov-report xml:coverage.xml --cov src --cov-fail-under 0 --cov-append -n auto"
 pythonpath = [
   "src"
 ]
@@ -190,7 +214,11 @@ unsafe-load-any-extension="no"
 
 [tool.pylint.'MESSAGES CONTROL']
 enable="c-extension-no-member"
-
+disable = [
+    "unused-import", # Covered by Ruff F401
+    "undefined-variable", # Covered by Ruff F821
+    "line-too-long", # Covered by Ruff E501
+]
 [tool.pylint.'REPORTS']
 evaluation="10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)"
 output-format="text"
@@ -325,3 +353,49 @@ overgeneral-exceptions= [
     "BaseException",
     "Exception"
 ]
+
+[tool.ruff]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ", "DTZ", "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
+line-length = 120
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Assume Python 3.10.
+target-version = "py311"
+
+[tool.ruff.mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10

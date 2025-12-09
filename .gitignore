@@ -109,6 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+azure.yaml
 
 # Spyder project settings
 .spyderproject
@@ -128,4 +129,19 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-index.*
+# Default Directory for llama index files
+storage/
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
+*.deb
+.venvs
+
+# Azurite artifacts
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json
+.python_packages
