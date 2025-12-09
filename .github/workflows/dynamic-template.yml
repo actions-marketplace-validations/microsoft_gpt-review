@@ -10,7 +10,7 @@ jobs:
     name: A job to create dynamic checklist
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
       - name: Dynamic checklist action
         uses: ethanresnick/dynamic-checklist@v1
         with:
